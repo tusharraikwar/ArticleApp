@@ -2,7 +2,7 @@
 //  AppDelegate.swift
 //  ArticleApp
 //
-//  Created by Reglaze Technologies on 30/09/20.
+//   
 //
 
 import UIKit
