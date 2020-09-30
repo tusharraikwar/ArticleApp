@@ -7,5 +7,6 @@ target 'ArticleApp' do
 
   # Pods for ArticleApp
   pod 'SDWebImage'
+  pod 'SVProgressHUD'
 
 end

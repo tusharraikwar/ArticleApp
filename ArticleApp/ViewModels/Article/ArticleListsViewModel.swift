@@ -28,27 +28,27 @@ class ArticleListsViewModel: NSObject {
 extension ArticleListsViewModel : UITableViewDelegate, UITableViewDataSource{
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        if let vc = self.vc{
-            return vc.arrArticleList.count
-        }
-        return 0
+        return Utils.arrArticleList.count
+
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if let vc = self.vc{
-            return vc.arrArticleList[section].media.count > 0 ? 4 : 3
-        }
-        return 0
+        return Utils.arrArticleList[section].media.count > 0 ? 4 : 3
+        
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let vc = self.vc{
+        if let _ = self.vc{
             
-            if indexPath.row == vc.arrArticleList.count - 1 {
-                vc.currentPageNo = vc.currentPageNo + 1
-                vc.getArticleList()
+            if tableView.isLast(for: indexPath) {
+               print("Last Row - Do Specific action")
+                if let VC = self.vc{
+                    VC.currentPageNo = VC.currentPageNo + 1
+                    VC.CallForArticleListing()
+                }
             }
-            let model = vc.arrArticleList[indexPath.section]
+            
+            let model = Utils.arrArticleList[indexPath.section]
             if indexPath.row == 0{
                let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleUserNameTableCell", for: indexPath) as! ArticleUserNameTableCell
                 cell.imgUser.backgroundColor = .lightGray
@@ -56,7 +56,7 @@ extension ArticleListsViewModel : UITableViewDelegate, UITableViewDataSource{
                 cell.lblUserDesignation.text = model.user[0].designation
                 return cell
             }else {
-                if vc.arrArticleList[indexPath.section].media.count > 0{
+                if Utils.arrArticleList[indexPath.section].media.count > 0{
                     if indexPath.row == 1{
                        let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleMediaImgTableCell", for: indexPath) as! ArticleMediaImgTableCell
                         cell.imgArticle.backgroundColor = .lightGray
@@ -91,10 +91,8 @@ extension ArticleListsViewModel : UITableViewDelegate, UITableViewDataSource{
         return UIView(frame: .zero)
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if let vc = self.vc{
-            return vc.arrArticleList[indexPath.section].media.count > 0 ? arrHeights[0][indexPath.row] : arrHeights[1][indexPath.row]
-        }
-        return 0
+        return Utils.arrArticleList[indexPath.section].media.count > 0 ? arrHeights[0][indexPath.row] : arrHeights[1][indexPath.row]
+        
     }
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         return UIView(frame: .zero)
@@ -104,5 +102,16 @@ extension ArticleListsViewModel : UITableViewDelegate, UITableViewDataSource{
     }
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return 0.0
+    }
+}
+
+extension UITableView {
+
+    func isLast(for indexPath: IndexPath) -> Bool {
+
+        let indexOfLastSection = numberOfSections > 0 ? numberOfSections - 1 : 0
+        let indexOfLastRowInLastSection = numberOfRows(inSection: indexOfLastSection) - 1
+
+        return indexPath.section == indexOfLastSection && indexPath.row == indexOfLastRowInLastSection
     }
 }
