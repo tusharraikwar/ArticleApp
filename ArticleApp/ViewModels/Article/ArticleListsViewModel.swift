@@ -8,7 +8,7 @@
 
 import Foundation
 import UIKit
-
+import SDWebImage
 class ArticleListsViewModel: NSObject {
     lazy var vc:ArticleListVC? = {
         
@@ -38,50 +38,62 @@ extension ArticleListsViewModel : UITableViewDelegate, UITableViewDataSource{
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let _ = self.vc{
-            
-            if tableView.isLast(for: indexPath) {
-               print("Last Row - Do Specific action")
-                if let VC = self.vc{
-                    VC.currentPageNo = VC.currentPageNo + 1
-                    VC.CallForArticleListing()
-                }
+        
+        if tableView.isLast(for: indexPath) {
+           print("Last Row - Do Specific action")
+            if let VC = self.vc{
+                VC.currentPageNo = VC.currentPageNo + 1
+                VC.CallForArticleListing()
             }
-            
-            let model = Utils.arrArticleList[indexPath.section]
-            if indexPath.row == 0{
-               let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleUserNameTableCell", for: indexPath) as! ArticleUserNameTableCell
-                cell.imgUser.backgroundColor = .lightGray
-                cell.lblUserName.text = model.user[0].name + model.user[0].lastname
-                cell.lblUserDesignation.text = model.user[0].designation
-                return cell
-            }else {
-                if Utils.arrArticleList[indexPath.section].media.count > 0{
-                    if indexPath.row == 1{
-                       let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleMediaImgTableCell", for: indexPath) as! ArticleMediaImgTableCell
-                        cell.imgArticle.backgroundColor = .lightGray
-                        return cell
-                    }else if indexPath.row == 2{
-                      let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleDescriptionTableCell", for: indexPath) as! ArticleDescriptionTableCell
-                        return cell
-                    }else{
-                        let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleLikesAndCommentsCountTableCell", for: indexPath) as! ArticleLikesAndCommentsCountTableCell
-                        return cell
-                    }
-                }else{
-                    if indexPath.row == 1{
-                       let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleDescriptionTableCell", for: indexPath) as! ArticleDescriptionTableCell
-                        return cell
-                    }else{
-                        let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleLikesAndCommentsCountTableCell", for: indexPath) as! ArticleLikesAndCommentsCountTableCell
-                        return cell
-                    }
-                }
-                
-            }
-        }else{
-            return UITableViewCell()
         }
+        
+        let model = Utils.arrArticleList[indexPath.section]
+        if indexPath.row == 0{
+           let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleUserNameTableCell", for: indexPath) as! ArticleUserNameTableCell
+
+            cell.lblUserName.text = model.user[0].name + model.user[0].lastname
+            cell.lblUserDesignation.text = model.user[0].designation
+            
+            cell.imgUser.backgroundColor = .lightGray
+            if let imageUrl = model.user[0].avatar{
+            cell.imgUser.sd_setImage(with: URL(string: imageUrl), placeholderImage: UIImage(named: "placeholder.png"))
+            }
+            
+            return cell
+        }else if Utils.arrArticleList[indexPath.section].media.count > 0{
+                if indexPath.row == 1{
+                   let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleMediaImgTableCell", for: indexPath) as! ArticleMediaImgTableCell
+                    cell.imgArticle.backgroundColor = .lightGray
+                    cell.imgArticle.contentMode = .scaleAspectFit
+                    if let imageUrl = model.media[0].image{
+                    cell.imgArticle.sd_setImage(with: URL(string: imageUrl), placeholderImage: UIImage(named: "placeholder.png"))
+                    }
+                    return cell
+                }else if indexPath.row == 2{
+                  let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleDescriptionTableCell", for: indexPath) as! ArticleDescriptionTableCell
+                    cell.txtViewDescription.text = model.content
+                    return cell
+                }else{
+                    let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleLikesAndCommentsCountTableCell", for: indexPath) as! ArticleLikesAndCommentsCountTableCell
+                    cell.lblLikes.text =  "\(model.likes ?? 0) Likes"
+                    cell.lblComments.text = "\(model.comments ?? 0) Comments"
+                    return cell
+                }
+            }
+            else if indexPath.row == 2{
+                    let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleLikesAndCommentsCountTableCell", for: indexPath) as! ArticleLikesAndCommentsCountTableCell
+                    cell.lblLikes.text =  "\(model.likes ?? 0) Likes"
+                    cell.lblComments.text = "\(model.comments ?? 0) Comments"
+                    return cell
+            }else{
+                if indexPath.row == 1{
+                   let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleDescriptionTableCell", for: indexPath) as! ArticleDescriptionTableCell
+                    
+                    return cell
+            }
+        }
+        
+        return UITableViewCell()
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
